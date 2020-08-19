@@ -15,6 +15,8 @@ public class Cliente implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty
+    @Size(min = 4, max = 40)
     private String nombre;
 
     @NotEmpty
@@ -23,6 +25,7 @@ public class Cliente implements Serializable {
 
     @NotEmpty
     @Email
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(name = "create_at")

@@ -2,6 +2,8 @@ package pe.tuna.proysenior.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -26,6 +28,11 @@ public class ClienteController {
     @GetMapping("/clientes")
     private List<Cliente> findAll() {
         return clienteService.findAll();
+    }
+
+    @GetMapping("/clientes/page/{page}")
+    private Page<Cliente> findAll(@PathVariable(name = "page") int page){
+        return clienteService.findAllPaginado(PageRequest.of(page, 4));
     }
 
     @GetMapping("/clientes/{id}")
@@ -55,39 +62,41 @@ public class ClienteController {
         response.put("isSuccess", true);
         response.put("isWarning", false);
         response.put("data", cliente);
-        response.put("message","Cliente encontrado");
+        response.put("message", "Cliente encontrado");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
     @PostMapping("/clientes")
     public ResponseEntity<?> save(@Validated @RequestBody Cliente cliente,
                                   BindingResult result) {
-        Cliente clienteNew = null;
+        Cliente clienteRegistrado = null;
         Map<String, Object> response = new HashMap<>();
         if (result.hasErrors()) {
             List<String> errors = result.getFieldErrors()
                     .stream()
                     .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage()).collect(Collectors.toList());
-            response.put("isSuccess",true);
+            response.put("isSuccess", true);
             response.put("isWarning", true);
             response.put("message", "Ingrese campos obligatorios");
-            response.put("data", errors);
+            response.put("data", null);
+            response.put("errors", errors);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
         }
         try {
-            clienteNew = clienteService.save(cliente);
+            clienteRegistrado = clienteService.save(cliente);
         } catch (DataAccessException e) {
-            response.put("isSuccess",false);
+            response.put("isSuccess", false);
             response.put("isWarning", true);
             response.put("message", "Error al crear el cliente en la base de datos");
-            response.put("data", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+            response.put("data", null);
+            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        response.put("isSuccess",true);
+        response.put("isSuccess", true);
         response.put("isWarning", false);
         response.put("message", "Cliente creado con exito");
-        response.put("data", clienteNew);
+        response.put("data", clienteRegistrado);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
