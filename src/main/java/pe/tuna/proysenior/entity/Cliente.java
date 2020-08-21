@@ -3,6 +3,7 @@ package pe.tuna.proysenior.entity;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
@@ -20,7 +21,7 @@ public class Cliente implements Serializable {
     private String nombre;
 
     @NotEmpty
-    @Size(min=4)
+    @Size(min = 4)
     private String apellido;
 
     @NotEmpty
@@ -28,15 +29,17 @@ public class Cliente implements Serializable {
     @Column(nullable = false, unique = true)
     private String email;
 
+    private String foto;
+
     @Column(name = "create_at")
     @Temporal(TemporalType.DATE)
     private Date createAt;
     private static final long serialVersionUID = 6023451760012427088L;
 
-    @PrePersist
-    public void prePersist(){
-        createAt = new Date();
-    }
+    //@PrePersist
+    //public void prePersist(){
+    //createAt = new Date();
+    //}
 
     public Long getId() {
         return id;
@@ -76,5 +79,13 @@ public class Cliente implements Serializable {
 
     public void setCreateAt(Date createAt) {
         this.createAt = createAt;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 }

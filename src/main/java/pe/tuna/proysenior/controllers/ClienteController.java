@@ -1,21 +1,28 @@
 package pe.tuna.proysenior.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import pe.tuna.proysenior.entity.Cliente;
 import pe.tuna.proysenior.service.ClienteService;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {"http://localhost:4200", "*"})
@@ -31,7 +38,7 @@ public class ClienteController {
     }
 
     @GetMapping("/clientes/page/{page}")
-    private Page<Cliente> findAll(@PathVariable(name = "page") int page){
+    private Page<Cliente> findAll(@PathVariable(name = "page") int page) {
         return clienteService.findAllPaginado(PageRequest.of(page, 4));
     }
 
@@ -134,7 +141,7 @@ public class ClienteController {
             clienteCurrent.setNombre(cliente.getNombre());
             clienteCurrent.setApellido(cliente.getApellido());
             clienteCurrent.setEmail(cliente.getEmail());
-            clienteCurrent.setCreateAt(new Date());
+            clienteCurrent.setCreateAt(cliente.getCreateAt());
             clienteActualizado = clienteService.save(clienteCurrent);
         } catch (DataAccessException e) {
             response.put("isSuccess", false);
@@ -166,6 +173,14 @@ public class ClienteController {
         }
 
         try {
+            String nombreFotoOld = cliente.getFoto();
+            if (nombreFotoOld != null && nombreFotoOld.length() > 0) {
+                Path rutaFotoOld = Paths.get("upload").resolve(nombreFotoOld).toAbsolutePath();
+                File archivoFotoOld = rutaFotoOld.toFile();
+                if (archivoFotoOld.exists() && archivoFotoOld.canRead()) {
+                    archivoFotoOld.delete();
+                }
+            }
             clienteService.delete(id);
         } catch (DataAccessException e) {
             response.put("isSuccess", false);
@@ -180,5 +195,64 @@ public class ClienteController {
         response.put("data", null);
         response.put("message", "Cliente eliminado con éxito");
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/clientes/upload")
+    public ResponseEntity<?> upload(@RequestParam(name = "archivo") MultipartFile archivo, @RequestParam(name = "id") Long id) {
+        Map<String, Object> response = new HashMap<>();
+        Cliente cliente = clienteService.findById(id);
+
+        if (!archivo.isEmpty()) {
+            String nombreArchivo = UUID.randomUUID().toString() + "_" + archivo.getOriginalFilename().replace(" ", "");
+            Path rutaArchivo = Paths.get("upload").resolve(nombreArchivo).toAbsolutePath();
+            System.out.println(rutaArchivo);
+            try {
+                Files.copy(archivo.getInputStream(), rutaArchivo);
+            } catch (IOException e) {
+                e.printStackTrace();
+                response.put("message", "Error al subir la imagen al servidor");
+                response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            String nombreFotoOld = cliente.getFoto();
+            if (nombreFotoOld != null && nombreFotoOld.length() > 0) {
+                Path rutaFotoOld = Paths.get("upload").resolve(nombreFotoOld).toAbsolutePath();
+                File archivoFotoOld = rutaFotoOld.toFile();
+                if (archivoFotoOld.exists() && archivoFotoOld.canRead()) {
+                    archivoFotoOld.delete();
+                }
+            }
+
+            cliente.setFoto(nombreArchivo);
+            clienteService.save(cliente);
+
+            response.put("isSuccess", true);
+            response.put("isWarning", false);
+            response.put("data", cliente);
+            response.put("message", "Imagen subida correctamente");
+        }
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/uploads/img/{nombreFoto:.+}")
+    public ResponseEntity<Resource> verFoto(@PathVariable(name = "nombreFoto") String nombreFoto) {
+        Path rutaArchivo = Paths.get("upload").resolve(nombreFoto).toAbsolutePath();
+        Resource recurso = null;
+
+        try {
+            recurso = new UrlResource(rutaArchivo.toUri());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        if (!recurso.exists() && !recurso.isReadable()){
+            throw new RuntimeException("Error no se pudo cargar la imagen: " + nombreFoto);
+        }
+
+        HttpHeaders cabecera = new HttpHeaders();
+        cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
+
+        return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
     }
 }
