@@ -1,5 +1,7 @@
 package pe.tuna.proysenior.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -29,6 +31,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 public class ClienteController {
+
+    private final Logger logger = LoggerFactory.getLogger(ClienteController.class);
+
     @Autowired
     private ClienteService clienteService;
 
@@ -205,7 +210,7 @@ public class ClienteController {
         if (!archivo.isEmpty()) {
             String nombreArchivo = UUID.randomUUID().toString() + "_" + archivo.getOriginalFilename().replace(" ", "");
             Path rutaArchivo = Paths.get("upload").resolve(nombreArchivo).toAbsolutePath();
-            System.out.println(rutaArchivo);
+            logger.info(rutaArchivo.toString());
             try {
                 Files.copy(archivo.getInputStream(), rutaArchivo);
             } catch (IOException e) {
@@ -239,7 +244,7 @@ public class ClienteController {
     public ResponseEntity<Resource> verFoto(@PathVariable(name = "nombreFoto") String nombreFoto) {
         Path rutaArchivo = Paths.get("upload").resolve(nombreFoto).toAbsolutePath();
         Resource recurso = null;
-
+        logger.info(rutaArchivo.toString());
         try {
             recurso = new UrlResource(rutaArchivo.toUri());
         } catch (MalformedURLException e) {
