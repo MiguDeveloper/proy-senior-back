@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pe.tuna.proysenior.entity.Cliente;
 import pe.tuna.proysenior.service.ClienteService;
+import pe.tuna.proysenior.service.UploadFileService;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,9 @@ public class ClienteController {
 
     @Autowired
     private ClienteService clienteService;
+
+    @Autowired
+    private UploadFileService uploadFileService;
 
     @GetMapping("/clientes")
     private List<Cliente> findAll() {
@@ -179,13 +183,7 @@ public class ClienteController {
 
         try {
             String nombreFotoOld = cliente.getFoto();
-            if (nombreFotoOld != null && nombreFotoOld.length() > 0) {
-                Path rutaFotoOld = Paths.get("upload").resolve(nombreFotoOld).toAbsolutePath();
-                File archivoFotoOld = rutaFotoOld.toFile();
-                if (archivoFotoOld.exists() && archivoFotoOld.canRead()) {
-                    archivoFotoOld.delete();
-                }
-            }
+            uploadFileService.eliminar(nombreFotoOld);
             clienteService.delete(id);
         } catch (DataAccessException e) {
             response.put("isSuccess", false);
@@ -208,26 +206,18 @@ public class ClienteController {
         Cliente cliente = clienteService.findById(id);
 
         if (!archivo.isEmpty()) {
-            String nombreArchivo = UUID.randomUUID().toString() + "_" + archivo.getOriginalFilename().replace(" ", "");
-            Path rutaArchivo = Paths.get("upload").resolve(nombreArchivo).toAbsolutePath();
-            logger.info(rutaArchivo.toString());
+            String nombreArchivo = null;
             try {
-                Files.copy(archivo.getInputStream(), rutaArchivo);
+                nombreArchivo = uploadFileService.copiar(archivo);
             } catch (IOException e) {
                 e.printStackTrace();
-                response.put("message", "Error al subir la imagen al servidor");
+                response.put("message", "Error al subir la imagen al servidor " + nombreArchivo);
                 response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             String nombreFotoOld = cliente.getFoto();
-            if (nombreFotoOld != null && nombreFotoOld.length() > 0) {
-                Path rutaFotoOld = Paths.get("upload").resolve(nombreFotoOld).toAbsolutePath();
-                File archivoFotoOld = rutaFotoOld.toFile();
-                if (archivoFotoOld.exists() && archivoFotoOld.canRead()) {
-                    archivoFotoOld.delete();
-                }
-            }
+            uploadFileService.eliminar(nombreFotoOld);
 
             cliente.setFoto(nombreArchivo);
             clienteService.save(cliente);
@@ -242,17 +232,12 @@ public class ClienteController {
 
     @GetMapping("/uploads/img/{nombreFoto:.+}")
     public ResponseEntity<Resource> verFoto(@PathVariable(name = "nombreFoto") String nombreFoto) {
-        Path rutaArchivo = Paths.get("upload").resolve(nombreFoto).toAbsolutePath();
         Resource recurso = null;
-        logger.info(rutaArchivo.toString());
+
         try {
-            recurso = new UrlResource(rutaArchivo.toUri());
+            recurso = uploadFileService.cargar(nombreFoto);
         } catch (MalformedURLException e) {
             e.printStackTrace();
-        }
-
-        if (!recurso.exists() && !recurso.isReadable()){
-            throw new RuntimeException("Error no se pudo cargar la imagen: " + nombreFoto);
         }
 
         HttpHeaders cabecera = new HttpHeaders();
