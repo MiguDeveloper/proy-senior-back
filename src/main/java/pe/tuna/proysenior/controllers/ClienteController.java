@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pe.tuna.proysenior.entity.Cliente;
+import pe.tuna.proysenior.entity.Region;
 import pe.tuna.proysenior.service.ClienteService;
 import pe.tuna.proysenior.service.UploadFileService;
 
@@ -151,6 +152,7 @@ public class ClienteController {
             clienteCurrent.setApellido(cliente.getApellido());
             clienteCurrent.setEmail(cliente.getEmail());
             clienteCurrent.setCreateAt(cliente.getCreateAt());
+            clienteCurrent.setRegion(cliente.getRegion());
             clienteActualizado = clienteService.save(clienteCurrent);
         } catch (DataAccessException e) {
             response.put("isSuccess", false);
@@ -244,5 +246,10 @@ public class ClienteController {
         cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
 
         return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
+    }
+
+    @GetMapping("/regiones")
+    public List<Region> listarRegiones(){
+        return clienteService.findAllRegiones();
     }
 }

@@ -3,6 +3,7 @@ package pe.tuna.proysenior.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pe.tuna.proysenior.entity.Cliente;
+import pe.tuna.proysenior.entity.Region;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ public interface ClienteService {
     public Cliente save(Cliente cliente);
 
     public void delete(Long id);
+
+    public List<Region> findAllRegiones();
 }
