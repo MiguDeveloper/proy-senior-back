@@ -4,13 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +22,11 @@ import pe.tuna.proysenior.entity.Region;
 import pe.tuna.proysenior.service.ClienteService;
 import pe.tuna.proysenior.service.UploadFileService;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {"http://localhost:4200", "*"})
@@ -83,6 +83,7 @@ public class ClienteController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
+    //@Secured("ROLE_ADMIN")
     @PostMapping("/clientes")
     public ResponseEntity<?> save(@Validated @RequestBody Cliente cliente,
                                   BindingResult result) {
@@ -117,6 +118,7 @@ public class ClienteController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
+    //@Secured("ROLE_ADMIN")
     @PutMapping("/clientes/{id}")
     public ResponseEntity<?> update(@Validated @RequestBody Cliente cliente,
                                     BindingResult result,
@@ -171,6 +173,7 @@ public class ClienteController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
+    //@Secured("ROLE_ADMIN")
     @DeleteMapping("/clientes/{id}")
     public ResponseEntity<?> delete(@PathVariable(name = "id") Long id) {
         Map<String, Object> response = new HashMap<>();
@@ -202,6 +205,7 @@ public class ClienteController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    //@Secured({"ROLE_USER", "ROLE_ADMIN"})
     @PostMapping("/clientes/upload")
     public ResponseEntity<?> upload(@RequestParam(name = "archivo") MultipartFile archivo, @RequestParam(name = "id") Long id) {
         Map<String, Object> response = new HashMap<>();
@@ -248,6 +252,7 @@ public class ClienteController {
         return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
     }
 
+    //@Secured("ROLE_ADMIN")
     @GetMapping("/regiones")
     public List<Region> listarRegiones(){
         return clienteService.findAllRegiones();

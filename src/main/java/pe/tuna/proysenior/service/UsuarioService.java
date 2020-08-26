@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UsuarioService implements UserDetailsService {
+public class UsuarioService implements UsuarioLocalService, UserDetailsService {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
@@ -49,5 +49,11 @@ public class UsuarioService implements UserDetailsService {
                 true,
                 true,
                 authorities);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Usuario findByUsername(String username) {
+        return usuarioRepository.findByUsername(username);
     }
 }
