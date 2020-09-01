@@ -6,8 +6,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.tuna.proysenior.entity.Cliente;
+import pe.tuna.proysenior.entity.Factura;
 import pe.tuna.proysenior.entity.Region;
 import pe.tuna.proysenior.repository.ClienteRepository;
+import pe.tuna.proysenior.repository.FacturaRepository;
 import pe.tuna.proysenior.service.ClienteService;
 
 import java.util.List;
@@ -16,6 +18,9 @@ import java.util.List;
 public class ClienteServiceImpl implements ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
+
+    @Autowired
+    private FacturaRepository facturaRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -51,5 +56,23 @@ public class ClienteServiceImpl implements ClienteService {
     @Transactional(readOnly = true)
     public List<Region> findAllRegiones() {
         return clienteRepository.findAllRegiones();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Factura findFacturaById(Long id) {
+        return facturaRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public Factura saveFactura(Factura factura) {
+        return facturaRepository.save(factura);
+    }
+
+    @Override
+    @Transactional
+    public void deleteFacturaById(Long id) {
+        facturaRepository.deleteById(id);
     }
 }

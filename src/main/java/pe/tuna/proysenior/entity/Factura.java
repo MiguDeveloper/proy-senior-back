@@ -23,6 +23,7 @@ public class Factura implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date createAt;
 
+    // Indicamos tambien la contraparte 'facturas' para evitar el loop infinito
     // Si queremos cambiarle el nombre de la llave foranea cliente_id podemos usar la anotacion
     // @JoinColumn(name="cliente_id")
     @JsonIgnoreProperties(value = {"facturas", "hibernateLazyInitializer", "handler"}, allowSetters = true)
