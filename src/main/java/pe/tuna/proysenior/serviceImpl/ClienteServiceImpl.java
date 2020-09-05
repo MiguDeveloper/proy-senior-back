@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.tuna.proysenior.entity.Cliente;
 import pe.tuna.proysenior.entity.Factura;
+import pe.tuna.proysenior.entity.Producto;
 import pe.tuna.proysenior.entity.Region;
 import pe.tuna.proysenior.repository.ClienteRepository;
 import pe.tuna.proysenior.repository.FacturaRepository;
+import pe.tuna.proysenior.repository.ProductoRepository;
 import pe.tuna.proysenior.service.ClienteService;
 
 import java.util.List;
@@ -21,6 +23,9 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Autowired
     private FacturaRepository facturaRepository;
+
+    @Autowired
+    private ProductoRepository productoRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -74,5 +79,11 @@ public class ClienteServiceImpl implements ClienteService {
     @Transactional
     public void deleteFacturaById(Long id) {
         facturaRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Producto> findProductoByNombre(String termino) {
+        return productoRepository.findByNombreContainingIgnoreCase(termino);
     }
 }

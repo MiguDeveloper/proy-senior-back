@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pe.tuna.proysenior.entity.Cliente;
 import pe.tuna.proysenior.entity.Factura;
+import pe.tuna.proysenior.entity.Producto;
 import pe.tuna.proysenior.entity.Region;
 
 import java.util.List;
@@ -26,4 +27,6 @@ public interface ClienteService {
     public Factura saveFactura(Factura factura);
 
     public void deleteFacturaById(Long id);
+
+    public List<Producto> findProductoByNombre(String termino);
 }
