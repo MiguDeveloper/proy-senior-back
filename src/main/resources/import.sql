@@ -3,9 +3,9 @@ INSERT INTO usuarios (username, password, enabled, nombre, apellido, email) valu
 INSERT INTO usuarios (username, password, enabled, nombre, apellido, email) values ('admin','$2a$10$dtB6css6tfT4BlDK52YTA.htfqdL68kDBO2rl6Y5akxJp28krm6r.',1,'Administrador', 'ApeAdmin','admin@gmail.com');
 INSERT INTO roles (nombre) VALUES ('ROLE_USER'), ('ROLE_ADMIN');
 INSERT INTO usuarios_roles (usuario_id, roles_id) VALUES (1,1), (2,2), (2,1);
-INSERT INTO db_proy_senior.regiones(nombre) values ('SudamÈrica'),('CentroamÈrica'),('NorteamÈrica'),('Europa'),('Asia'),('Africa'),('OceanÌa'),('Ant·rtida');
+INSERT INTO db_proy_senior.regiones(nombre) values ('Sudam√©rica'),('Centroam√©rica'),('Norteam√©rica'),('Europa'),('Asia'),('Africa'),('Ocean√≠a'),('Ant√°rtida');
 
-INSERT INTO clientes (region_id, nombre, apellido, email, create_at) VALUES(1, 'Andres', 'Guzm·n', 'profesor@bolsadeideas.com', NOW());
+INSERT INTO clientes (region_id, nombre, apellido, email, create_at) VALUES(1, 'Andres', 'Guzm√°n', 'profesor@bolsadeideas.com', NOW());
 
 INSERT INTO productos(nombre, precio, create_at) VALUES ('Panasonic Pantalla LED', 2156.23, NOW());
 INSERT INTO productos(nombre, precio, create_at) VALUES ('Sony camara digital', 156.23, NOW());
