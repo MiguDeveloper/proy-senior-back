@@ -5,7 +5,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pe.tuna.proysenior.entity.Cliente;
 import pe.tuna.proysenior.entity.Factura;
 import pe.tuna.proysenior.entity.Producto;
 import pe.tuna.proysenior.service.ClienteService;
@@ -97,5 +96,24 @@ public class FacturaController {
         response.put("data", productos);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/facturas")
+    public ResponseEntity<?> crearFactura(@RequestBody Factura factura) {
+        Map<String, Object> response = new HashMap<>();
+        Factura factura1 = null;
+        try {
+            factura1 = clienteService.saveFactura(factura);
+        } catch (DataAccessException e) {
+            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        response.put("isSuccess", true);
+        response.put("isWarning", false);
+        response.put("message", "Factura creada con éxito");
+        response.put("data", factura1);
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }
